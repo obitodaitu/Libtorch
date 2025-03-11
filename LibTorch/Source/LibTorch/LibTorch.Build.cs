@@ -89,19 +89,17 @@ public class LibTorch : ModuleRules
             // CUDA头文件
             AddIncludeFolders(Path.Combine(CUDAPath, "include"));
             LinkLibraryFiles(Path.Combine(CUDAPath, "lib"));
-            LinkLibraryFiles(Path.Combine(CUDAPath, "bin"));
+            LinkLibraryFiles(Path.Combine(CUDAPath, "bin"), true);
             
            
 
-            //PublicAdditionalLibraries.Add("/INCLUDE:\"?warp_size@cuda@at@@YAHXZ\"");
-
-            string torch_cpu_path = Path.Combine(libtorchPath, "lib") + "/torch_cpu.lib";
+            string torch_cpu_path = Path.Combine(libtorchPath, "lib", "torch_cpu.lib");
             PublicAdditionalLibraries.Add($"/WHOLEARCHIVE:{torch_cpu_path}");
 
-            string torch_cuda_path = Path.Combine(libtorchPath, "lib") + "/torch_cuda.lib";
+            string torch_cuda_path = Path.Combine(libtorchPath, "lib", "torch_cuda.lib");
             PublicAdditionalLibraries.Add($"/WHOLEARCHIVE:{torch_cuda_path}");
 
-            string c10_cuda_path = Path.Combine(libtorchPath, "lib") + "/c10_cuda.lib";
+            string c10_cuda_path = Path.Combine(libtorchPath, "lib", "c10_cuda.lib");
             PublicAdditionalLibraries.Add($"/WHOLEARCHIVE:{c10_cuda_path}");
 
         }
@@ -121,7 +119,7 @@ public class LibTorch : ModuleRules
 	 *
 	 * @param libraryPath Path to folder with library files
 	 */
-    private void LinkLibraryFiles(string libraryPath)
+    private void LinkLibraryFiles(string libraryPath, bool IsCopyDll = false)
     {
         var filePaths = Directory.GetFiles(libraryPath!, "*", SearchOption.AllDirectories);
         foreach (var filePath in filePaths)
@@ -134,7 +132,16 @@ public class LibTorch : ModuleRules
             }
             else if (fileName.EndsWith(".dll"))
             {
-                RuntimeDependencies.Add(filePath);
+                if (IsCopyDll && File.Exists(filePath))
+                {
+                    var targetPath = Path.Combine(ModuleDirectory, "Binaries", "Win64", fileName);
+                    //var targetPath = "$(ProjectDir)/Binaries/Win64/" + fileName;
+                    RuntimeDependencies.Add(targetPath, filePath);
+                }else
+                {
+                    RuntimeDependencies.Add(filePath);
+                }
+                
                 PublicDelayLoadDLLs.Add(fileName);
             }
             else
