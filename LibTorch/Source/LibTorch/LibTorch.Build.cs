@@ -48,7 +48,8 @@ public class LibTorch : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
-                "Projects"
+                "Projects",
+               
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
@@ -89,9 +90,9 @@ public class LibTorch : ModuleRules
             // CUDA头文件
             AddIncludeFolders(Path.Combine(CUDAPath, "include"));
             LinkLibraryFiles(Path.Combine(CUDAPath, "lib"));
-            LinkLibraryFiles(Path.Combine(CUDAPath, "bin"), true);
-            
-           
+            //LinkLibraryFiles(Path.Combine(CUDAPath, "bin"), true);
+
+
 
             string torch_cpu_path = Path.Combine(libtorchPath, "lib", "torch_cpu.lib");
             PublicAdditionalLibraries.Add($"/WHOLEARCHIVE:{torch_cpu_path}");
@@ -134,8 +135,8 @@ public class LibTorch : ModuleRules
             {
                 if (IsCopyDll && File.Exists(filePath))
                 {
-                    var targetPath = Path.Combine(ModuleDirectory, "Binaries", "Win64", fileName);
-                    //var targetPath = "$(ProjectDir)/Binaries/Win64/" + fileName;
+                    //var targetPath = Path.Combine(ModuleDirectory, "Binaries", "Win64", fileName);
+                    var targetPath = Path.Combine("$(ProjectDir)", "Binaries", "Win64", fileName);
                     RuntimeDependencies.Add(targetPath, filePath);
                 }else
                 {
